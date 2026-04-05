@@ -1,4 +1,6 @@
 #include "Player.h"
+#include "Weapon.h"
+#include "Armor.h"
 #include <iostream>
 
 // PDCurses key codes
@@ -45,17 +47,19 @@ void Player::move(int key) {
 }
 
 void Player::equip(Weapon* weapon) {
-    // Full logic once Weapon is built
+    if (equippedWeapon != nullptr)
+        std::cout << name << " unequips " << equippedWeapon->name << ".\n";
     equippedWeapon = weapon;
-    std::cout << "Commander equipped a weapon.\n";
+    attackPower = weapon->damage;  
 }
-
+ 
 void Player::equipArmor(Armor* armor) {
-    // Full logic once Armor is built
+    if (equippedArmor != nullptr)
+        std::cout << name << " unequips " << equippedArmor->name << ".\n";
     equippedArmor = armor;
-    std::cout << "Commander equipped armor.\n";
+    defensePower = armor->defensePower; 
 }
-
+ 
 void Player::useItem(int itemIndex) {
     // Full logic once Inventory is built
     std::cout << "Commander uses item at index " << itemIndex << ".\n";
