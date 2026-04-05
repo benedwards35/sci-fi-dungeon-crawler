@@ -1,11 +1,11 @@
 #pragma once
 #include <string>
 #include "Entity.h"
+#include "Armor.h"
+#include "Weapon.h"
+#include "Inventory.h"
 
-// TODO: These classes
-class Inventory;
-class Weapon;
-class Armor;
+// TODO
 class Room;
 
 class Player : public Entity {

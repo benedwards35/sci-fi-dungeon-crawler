@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "Weapon.h"
 #include "Armor.h"
+#include "Inventory.h"
 #include <iostream>
 
 // PDCurses key codes
@@ -12,7 +13,7 @@
 Player::Player(int hp, int attackPower, int defensePower)
     : Entity("Commander", hp, attackPower, defensePower),
     //TODO: These classes
-      inventory(nullptr),
+      inventory(new Inventory()),
       equippedWeapon(nullptr),
       equippedArmor(nullptr),
       currentRoom(nullptr) {}
@@ -61,6 +62,14 @@ void Player::equipArmor(Armor* armor) {
 }
  
 void Player::useItem(int itemIndex) {
-    // Full logic once Inventory is built
-    std::cout << "Commander uses item at index " << itemIndex << ".\n";
+    if (inventory == nullptr) {
+        std::cout << "No inventory!\n";
+        return;
+    }
+
+    if (itemIndex < 0 || itemIndex >= (int)inventory->items.size()) {
+        std::cout << "Invalid inventory slot.\n";
+        return;
+    }
+    inventory->items[itemIndex]->use(this);
 }

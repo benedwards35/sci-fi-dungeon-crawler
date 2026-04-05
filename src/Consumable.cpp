@@ -1,5 +1,6 @@
 #include "Consumable.h"
 #include "Player.h"
+#include "Inventory.h"
 #include <iostream>
 #include <algorithm> 
 
@@ -16,6 +17,7 @@ void Consumable::use(Player* player) {
               << " and recovers " << actual << " HP ("
               << player->hp << "/" << player->maxHp << ")\n";
 
-    // TODO: remove from inventory once Inventory is built
-    // player->inventory->removeItem(this);
+    if (player->inventory != nullptr){
+        player->inventory->removeItem(this);
+    }
 }
