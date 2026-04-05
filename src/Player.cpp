@@ -19,31 +19,41 @@ Player::Player(int hp, int attackPower, int defensePower)
       currentRoom(nullptr) {}
 
 void Player::move(int key) {
-    // Room connections not built yet — prints direction for now
+    int direction = -1;
+
     switch (key) {
-        case KEY_UP:
-        case 'w':
-        case 'W':
-            std::cout << "Moving north...\n";
-            break;
-        case KEY_DOWN:
-        case 's':
-        case 'S':
-            std::cout << "Moving south...\n";
-            break;
-        case KEY_LEFT:
-        case 'a':
-        case 'A':
-            std::cout << "Moving west...\n";
-            break;
-        case KEY_RIGHT:
-        case 'd':
-        case 'D':
-            std::cout << "Moving east...\n";
-            break;
-        default:
-            std::cout << "Unknown direction.\n";
-            break;
+        case KEY_UP:    case 'w': case 'W': direction = NORTH; break;
+        case KEY_DOWN:  case 's': case 'S': direction = SOUTH; break;
+        case KEY_LEFT:  case 'a': case 'A': direction = WEST;  break;
+        case KEY_RIGHT: case 'd': case 'D': direction = EAST;  break;
+        default: return;
+    }
+
+    if (currentRoom == nullptr) return;
+
+    Room* next = currentRoom->exits[direction];
+    if (next != nullptr) {
+        currentRoom = next;
+    } else {
+        std::cout << "No exit that way.\n";
+    }
+}
+
+void Player::pickUpItem(int index) {
+    if (currentRoom == nullptr) {
+        std::cout << "You're not in a room.\n";
+        return;
+    }
+
+    if (index < 0 || index >= (int)currentRoom->items.size()) {
+        std::cout << "No item at that index.\n";
+        return;
+    }
+
+    Item* item = currentRoom->items[index];
+
+    if (inventory->addItem(item)) {       // returns false if inventory full
+        currentRoom->removeItem(item);
     }
 }
 

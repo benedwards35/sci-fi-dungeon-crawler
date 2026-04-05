@@ -4,9 +4,7 @@
 #include "Armor.h"
 #include "Weapon.h"
 #include "Inventory.h"
-
-// TODO
-class Room;
+#include "Room.h"
 
 class Player : public Entity {
 public:
@@ -20,8 +18,9 @@ public:
 
     // Takes a PDCurses key code: KEY_UP/DOWN/LEFT/RIGHT or 'w'/'a'/'s'/'d'
     void move(int key);
-
+    void pickUpItem(int index); 
     void equip(Weapon* weapon);
     void equipArmor(Armor* armor);
     void useItem(int itemIndex);
+    
 };

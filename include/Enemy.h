@@ -2,9 +2,7 @@
 #include <string>
 #include <vector>
 #include "Entity.h"
-
-// TODO: Item Class
-class Item;
+#include "Item.h"
 
 class Enemy : public Entity {
 public:
