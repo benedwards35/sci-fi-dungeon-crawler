@@ -3,10 +3,9 @@
 #include "Weapon.h"
 #include "Armor.h"
 #include "Consumable.h"
-#include <iostream>
 
 // PDCurses — comment this block out if testing without it
-#include <curses.h>
+#include "curses.h"
 
 Game::Game()
     : player(nullptr),
@@ -59,7 +58,6 @@ void Game::start() {
     noecho();        // don't print keypresses to screen
     cbreak();        // get keys instantly, no Enter required
     keypad(stdscr, TRUE); // enable arrow keys
-    
 
     running = true;
     player->currentRoom->describe();
@@ -73,7 +71,6 @@ void Game::start() {
 void Game::gameLoop() {
     while (running) {
         int key = getch();  // blocks until a key is pressed
-        //int key = std::cin.get();
         switch (key) {
             // Movement
             case KEY_UP:    case 'w': case 'W':
@@ -135,14 +132,17 @@ void Game::gameLoop() {
         }
 
         if (!player->isAlive()) {
-            std::cout << "\nYou have died. The ship swallows you.\n";
+            printw("\nYou have died. The ship swallows you.\n");
+            refresh();
+            getch();  // pause so the player can read the message
             running = false;
         }
     }
 }
 
 void Game::handleCombat() {
-    std::cout << "\n--- COMBAT ---\n";
+    printw("\n--- COMBAT ---\n");
+    refresh();
 
     while (player->isAlive() && !player->currentRoom->enemies.empty()) {
         Enemy* target = player->currentRoom->enemies[0];  // fight one at a time
@@ -151,13 +151,14 @@ void Game::handleCombat() {
         player->attackTarget(target);
 
         if (!target->isAlive()) {
-            std::cout << target->name << " is destroyed.\n";
+            printw("%s is destroyed.\n", target->name.c_str());
 
             // Drop loot into the room
             for (Item* loot : target->lootTable) {
                 player->currentRoom->addItem(loot);
-                std::cout << loot->name << " drops to the floor.\n";
+                printw("%s drops to the floor.\n", loot->name.c_str());
             }
+            refresh();
 
             player->currentRoom->enemies.erase(
                 player->currentRoom->enemies.begin()
@@ -169,14 +170,17 @@ void Game::handleCombat() {
         target->behavior();
         target->attackTarget(player);
 
-        // Brief pause so curses doesn't swallow the output
+        // Pause so the player can read the exchange before the next round
         int key = getch();
-        //int key = std::cin.get();
         if (key == 'q' || key == 'Q') { running = false; break; }
     }
 
     if (player->isAlive()) {
-        std::cout << "--- CLEAR ---\n";
+        printw("--- CLEAR ---\n");
+        refresh();
+        printw("Press any key to continue...\n");
+        refresh();
+        getch();  // pause before describe() clears the screen
         player->currentRoom->describe();
     }
 }

@@ -2,13 +2,7 @@
 #include "Weapon.h"
 #include "Armor.h"
 #include "Inventory.h"
-#include <iostream>
-
-// PDCurses key codes
-#define KEY_UP    259
-#define KEY_DOWN  258
-#define KEY_LEFT  260
-#define KEY_RIGHT 261
+#include "curses.h"
 
 Player::Player(int hp, int attackPower, int defensePower)
     : Entity("Commander", hp, attackPower, defensePower),
@@ -35,18 +29,21 @@ void Player::move(int key) {
     if (next != nullptr) {
         currentRoom = next;
     } else {
-        std::cout << "No exit that way.\n";
+        printw("No exit that way.\n");
+        refresh();
     }
 }
 
 void Player::pickUpItem(int index) {
     if (currentRoom == nullptr) {
-        std::cout << "You're not in a room.\n";
+        printw("You're not in a room.\n");
+        refresh();
         return;
     }
 
     if (index < 0 || index >= (int)currentRoom->items.size()) {
-        std::cout << "No item at that index.\n";
+        printw("No item at that index.\n");
+        refresh();
         return;
     }
 
@@ -58,27 +55,33 @@ void Player::pickUpItem(int index) {
 }
 
 void Player::equip(Weapon* weapon) {
-    if (equippedWeapon != nullptr)
-        std::cout << name << " unequips " << equippedWeapon->name << ".\n";
+    if (equippedWeapon != nullptr) {
+        printw("%s unequips %s.\n", name.c_str(), equippedWeapon->name.c_str());
+        refresh();
+    }
     equippedWeapon = weapon;
-    attackPower = weapon->damage;  
+    attackPower = weapon->damage;
 }
- 
+
 void Player::equipArmor(Armor* armor) {
-    if (equippedArmor != nullptr)
-        std::cout << name << " unequips " << equippedArmor->name << ".\n";
+    if (equippedArmor != nullptr) {
+        printw("%s unequips %s.\n", name.c_str(), equippedArmor->name.c_str());
+        refresh();
+    }
     equippedArmor = armor;
-    defensePower = armor->defensePower; 
+    defensePower = armor->defensePower;
 }
- 
+
 void Player::useItem(int itemIndex) {
     if (inventory == nullptr) {
-        std::cout << "No inventory!\n";
+        printw("No inventory!\n");
+        refresh();
         return;
     }
 
     if (itemIndex < 0 || itemIndex >= (int)inventory->items.size()) {
-        std::cout << "Invalid inventory slot.\n";
+        printw("Invalid inventory slot.\n");
+        refresh();
         return;
     }
     inventory->items[itemIndex]->use(this);

@@ -1,6 +1,6 @@
 #include "Armor.h"
 #include "Player.h"
-#include <iostream>
+#include "curses.h"
 
 Armor::Armor(std::string name, std::string description, int defensePower):
     Item(name, description),
@@ -8,5 +8,6 @@ Armor::Armor(std::string name, std::string description, int defensePower):
 
 void Armor::use(Player* player){
     player->equipArmor(this);
-    std::cout << player->name << " equips " << name << " [+" << defensePower << " defense]\n";
+    printw("%s equips %s [+%d defense]\n", player->name.c_str(), name.c_str(), defensePower);
+    refresh();
 }

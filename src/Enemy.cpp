@@ -1,5 +1,5 @@
 #include "Enemy.h"
-#include <iostream>
+#include "curses.h"
 
 Enemy::Enemy(std::string name, std::string description, int hp, int attackPower, int defensePower)
     : Entity(name, hp, attackPower, defensePower),
@@ -7,5 +7,6 @@ Enemy::Enemy(std::string name, std::string description, int hp, int attackPower,
 
 void Enemy::behavior() {
     // TODO: Subtype Behavior
-    std::cout << name << " stands still, its sensors scanning the corridor...\n";
+    printw("%s stands still, its sensors scanning the corridor...\n", name.c_str());
+    refresh();
 }
