@@ -1,16 +1,26 @@
 #include <iostream>
 #include "Entity.h"
+#include "Player.h"
+#include "Enemy.h"
 
 int main() {
-    Entity marine("Marine", 100, 15, 5);
-    Entity drone("Scout Drone", 40, 10, 2);
+    Player player(100, 15, 5);
+    Enemy drone("Scout Drone", "A battered recon unit, one eye flickering.", 40, 10, 2);
 
-    std::cout << "=== Combat Test ===\n";
-    marine.attackTarget(&drone);
-    drone.attackTarget(&marine);
+    std::cout << "=== Behavior Test ===\n";
+    drone.behavior();
 
-    std::cout << "\n--- Is the drone still alive? ---\n";
-    std::cout << (drone.isAlive() ? "Yes" : "No") << "\n";
+    std::cout << "\n=== Combat Test ===\n";
+    player.attackTarget(&drone);
+    drone.attackTarget(&player);
+
+    std::cout << "\n=== Movement Test ===\n";
+    player.move('w');
+    player.move('d');
+
+    std::cout << "\n=== Alive Check ===\n";
+    std::cout << "Drone alive? " << (drone.isAlive() ? "Yes" : "No") << "\n";
+    std::cout << "Commander alive? " << (player.isAlive() ? "Yes" : "No") << "\n";
 
     return 0;
 }
