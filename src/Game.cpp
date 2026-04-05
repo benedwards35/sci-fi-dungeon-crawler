@@ -3,9 +3,8 @@
 #include "Weapon.h"
 #include "Armor.h"
 #include "Consumable.h"
-
-// PDCurses — comment this block out if testing without it
-#include "curses.h"
+#include "Item.h"
+#include "UI.h"
 
 Game::Game()
     : player(nullptr),
@@ -19,13 +18,17 @@ Game::~Game() {
 }
 
 void Game::start() {
-    // --- Build the ship ---
+    // ── Build the ship ────────────────────────────────────────────────────
     ship = new Ship();
 
-    Room* bridge   = new Room("Bridge",   "Flickering consoles line the walls. A viewport stares into the void.");
-    Room* corridor = new Room("Corridor", "A long maintenance corridor. Pipes hiss and groan overhead.");
-    Room* medbay   = new Room("Medbay",   "Overturned gurneys. The smell of antiseptic and something worse.");
-    Room* cargo    = new Room("Cargo Bay","Massive shipping containers, some torn open. Things moved in here.");
+    Room* bridge   = new Room("Bridge",
+        "Flickering consoles line the walls. A viewport stares into the void.");
+    Room* corridor = new Room("Corridor",
+        "A long maintenance corridor. Pipes hiss and groan overhead.");
+    Room* medbay   = new Room("Medbay",
+        "Overturned gurneys. The smell of antiseptic and something worse.");
+    Room* cargo    = new Room("Cargo Bay",
+        "Massive shipping containers, some torn open. Things moved in here.");
 
     ship->addRoom(bridge);    // first added = starting room
     ship->addRoom(corridor);
@@ -36,93 +39,89 @@ void Game::start() {
     ship->connectRooms(corridor, medbay,   EAST);
     ship->connectRooms(corridor, cargo,    WEST);
 
-    // --- Populate rooms ---
+    // ── Populate rooms ───────────────────────────────────────────────────
     Enemy* drone = new Enemy("Scout Drone",
-                             "A battered recon unit, one eye flickering.", 40, 8, 2);
+        "A battered recon unit, one eye flickering.", 40, 8, 2);
     corridor->addEnemy(drone);
 
     Weapon* plasmaCutter = new Weapon("Plasma Cutter",
-                                      "A mining tool repurposed for combat.", 25, "plasma");
+        "A mining tool repurposed for combat.", 25, "plasma");
     medbay->addItem(plasmaCutter);
 
     Armor* enviroSuit = new Armor("Enviro Suit",
-                                  "Lightweight pressure suit with reinforced plating.", 8);
+        "Lightweight pressure suit with reinforced plating.", 8);
     cargo->addItem(enviroSuit);
 
-    // --- Build the player ---
+    // ── Build the player ─────────────────────────────────────────────────
     player = new Player(100, 10, 5);
-    player->currentRoom = ship->currentRoom;  // place player in starting room
+    player->currentRoom = ship->currentRoom;
 
-    // --- Init PDCurses ---
-    initscr();       // start curses mode
-    noecho();        // don't print keypresses to screen
-    cbreak();        // get keys instantly, no Enter required
-    keypad(stdscr, TRUE); // enable arrow keys
+    // ── Initialise UI (starts PDCurses, creates all windows) ─────────────
+    UI::get().init();
 
     running = true;
-    player->currentRoom->describe();
-    refresh();
+    UI::get().drawStats(player);
+    UI::get().drawRoom(player->currentRoom);
+
     gameLoop();
 
-    // --- Teardown PDCurses ---
-    endwin();
+    UI::get().shutdown();
 }
 
 void Game::gameLoop() {
     while (running) {
-        int key = getch();  // blocks until a key is pressed
+        UI::get().drawStats(player);
+
+        int key = UI::get().getInput();
         switch (key) {
-            // Movement
+            // ── Movement ─────────────────────────────────────────────────
             case KEY_UP:    case 'w': case 'W':
             case KEY_DOWN:  case 's': case 'S':
             case KEY_LEFT:  case 'a': case 'A':
             case KEY_RIGHT: case 'd': case 'D':
                 player->move(key);
                 if (player->currentRoom != nullptr) {
-                    player->currentRoom->describe();
+                    UI::get().drawRoom(player->currentRoom);
                     if (!player->currentRoom->enemies.empty()) {
                         handleCombat();
                     }
                 }
                 break;
 
-            // Use item by index (keys 0-9)
+            // ── Use item by index (0–9) ───────────────────────────────────
             case '0': case '1': case '2': case '3': case '4':
             case '5': case '6': case '7': case '8': case '9':
-                player->useItem(key - '0');  // '3' - '0' = 3 (int index)
+                player->useItem(key - '0');
                 break;
 
+            // ── Inventory ────────────────────────────────────────────────
             case 'i': case 'I': {
                 player->inventory->displayItems();
-                refresh();
-                printw("Use which item? (0-9, or any other key to cancel): ");
-                refresh();
-                int next = getch();
+                UI::get().message("Use which item? (0-9, or any other key to cancel)");
+                int next = UI::get().getInput();
                 if (next >= '0' && next <= '9') {
                     player->useItem(next - '0');
                 }
-                player->currentRoom->describe();
+                UI::get().message("");
                 break;
             }
 
+            // ── Pick up ───────────────────────────────────────────────────
             case 'p': case 'P': {
                 if (player->currentRoom->items.empty()) {
-                    printw("Nothing to pick up.\n");
-                    refresh();
+                    UI::get().message("Nothing to pick up.");
                     break;
                 }
-                player->currentRoom->describe();
-                printw("Pick up which item? (0-9): ");
-                refresh();
-                int next = getch();
+                UI::get().message("Pick up which item? (0-9):");
+                int next = UI::get().getInput();
                 if (next >= '0' && next <= '9') {
                     player->pickUpItem(next - '0');
                 }
-                player->currentRoom->describe();
+                UI::get().drawRoom(player->currentRoom);
                 break;
             }
 
-            // Quit
+            // ── Quit ─────────────────────────────────────────────────────
             case 'q': case 'Q':
                 running = false;
                 break;
@@ -132,33 +131,32 @@ void Game::gameLoop() {
         }
 
         if (!player->isAlive()) {
-            printw("\nYou have died. The ship swallows you.\n");
-            refresh();
-            getch();  // pause so the player can read the message
+            UI::get().log(UI::STYLE_ENEMY, "You have died. The ship swallows you.");
+            UI::get().message("Press any key to exit.");
+            UI::get().getInput();
             running = false;
         }
     }
 }
 
 void Game::handleCombat() {
-    printw("\n--- COMBAT ---\n");
-    refresh();
+    UI::get().log(UI::STYLE_HEADER, "");
+    UI::get().log(UI::STYLE_HEADER, "=== COMBAT INITIATED ===");
 
     while (player->isAlive() && !player->currentRoom->enemies.empty()) {
-        Enemy* target = player->currentRoom->enemies[0];  // fight one at a time
+        Enemy* target = player->currentRoom->enemies[0];
 
         // Player attacks
         player->attackTarget(target);
+        UI::get().drawStats(player);
 
         if (!target->isAlive()) {
-            printw("%s is destroyed.\n", target->name.c_str());
+            UI::get().log(UI::STYLE_GOOD, "%s is destroyed.", target->name.c_str());
 
-            // Drop loot into the room
             for (Item* loot : target->lootTable) {
                 player->currentRoom->addItem(loot);
-                printw("%s drops to the floor.\n", loot->name.c_str());
+                UI::get().log(UI::STYLE_ITEM, "%s drops to the floor.", loot->name.c_str());
             }
-            refresh();
 
             player->currentRoom->enemies.erase(
                 player->currentRoom->enemies.begin()
@@ -169,18 +167,20 @@ void Game::handleCombat() {
         // Enemy attacks back
         target->behavior();
         target->attackTarget(player);
+        UI::get().drawStats(player);
 
-        // Pause so the player can read the exchange before the next round
-        int key = getch();
+        // Pause between rounds so the player can read the exchange
+        UI::get().message("Press any key for next round, [Q] to flee.");
+        int key = UI::get().getInput();
         if (key == 'q' || key == 'Q') { running = false; break; }
+        UI::get().message("");
     }
 
     if (player->isAlive()) {
-        printw("--- CLEAR ---\n");
-        refresh();
-        printw("Press any key to continue...\n");
-        refresh();
-        getch();  // pause before describe() clears the screen
-        player->currentRoom->describe();
+        UI::get().log(UI::STYLE_GOOD, "=== AREA CLEAR ===");
+        UI::get().message("Combat over. Press any key to continue.");
+        UI::get().getInput();
+        UI::get().message("");
+        UI::get().drawRoom(player->currentRoom);
     }
 }

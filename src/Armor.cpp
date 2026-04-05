@@ -1,13 +1,13 @@
 #include "Armor.h"
 #include "Player.h"
-#include "curses.h"
+#include "UI.h"
 
-Armor::Armor(std::string name, std::string description, int defensePower):
-    Item(name, description),
-    defensePower(defensePower) {}
+Armor::Armor(std::string name, std::string description, int defensePower)
+    : Item(name, description),
+      defensePower(defensePower) {}
 
-void Armor::use(Player* player){
+void Armor::use(Player* player) {
     player->equipArmor(this);
-    printw("%s equips %s [+%d defense]\n", player->name.c_str(), name.c_str(), defensePower);
-    refresh();
+    UI::get().message("%s equips %s [+%d defense]",
+        player->name.c_str(), name.c_str(), defensePower);
 }

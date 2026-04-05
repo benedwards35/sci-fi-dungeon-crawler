@@ -1,5 +1,5 @@
 #include "Entity.h"
-#include "curses.h"
+#include "UI.h"
 #include <algorithm>
 
 Entity::Entity(std::string name, int hp, int attackPower, int defensePower)
@@ -10,8 +10,7 @@ void Entity::takeDamage(int amount) {
     hp -= damage;
     hp = std::max(0, hp);
 
-    printw("%s takes %d damage! (%d/%d HP)\n", name.c_str(), damage, hp, maxHp);
-    refresh();
+    UI::get().log("%s takes %d damage! (%d/%d HP)", name.c_str(), damage, hp, maxHp);
 }
 
 bool Entity::isAlive() const {
@@ -19,7 +18,6 @@ bool Entity::isAlive() const {
 }
 
 void Entity::attackTarget(Entity* target) {
-    printw("%s attacks %s!\n", name.c_str(), target->name.c_str());
-    refresh();
+    UI::get().log("%s attacks %s!", name.c_str(), target->name.c_str());
     target->takeDamage(attackPower);
 }

@@ -2,11 +2,10 @@
 #include "Weapon.h"
 #include "Armor.h"
 #include "Inventory.h"
-#include "curses.h"
+#include "UI.h"
 
 Player::Player(int hp, int attackPower, int defensePower)
     : Entity("Commander", hp, attackPower, defensePower),
-    //TODO: These classes
       inventory(new Inventory()),
       equippedWeapon(nullptr),
       equippedArmor(nullptr),
@@ -29,35 +28,31 @@ void Player::move(int key) {
     if (next != nullptr) {
         currentRoom = next;
     } else {
-        printw("No exit that way.\n");
-        refresh();
+        UI::get().message("No exit that way.");
     }
 }
 
 void Player::pickUpItem(int index) {
     if (currentRoom == nullptr) {
-        printw("You're not in a room.\n");
-        refresh();
+        UI::get().message("You're not in a room.");
         return;
     }
 
     if (index < 0 || index >= (int)currentRoom->items.size()) {
-        printw("No item at that index.\n");
-        refresh();
+        UI::get().message("No item at that index.");
         return;
     }
 
     Item* item = currentRoom->items[index];
 
-    if (inventory->addItem(item)) {       // returns false if inventory full
+    if (inventory->addItem(item)) {   // addItem shows "X added to inventory." message
         currentRoom->removeItem(item);
     }
 }
 
 void Player::equip(Weapon* weapon) {
     if (equippedWeapon != nullptr) {
-        printw("%s unequips %s.\n", name.c_str(), equippedWeapon->name.c_str());
-        refresh();
+        UI::get().message("%s unequips %s.", name.c_str(), equippedWeapon->name.c_str());
     }
     equippedWeapon = weapon;
     attackPower = weapon->damage;
@@ -65,8 +60,7 @@ void Player::equip(Weapon* weapon) {
 
 void Player::equipArmor(Armor* armor) {
     if (equippedArmor != nullptr) {
-        printw("%s unequips %s.\n", name.c_str(), equippedArmor->name.c_str());
-        refresh();
+        UI::get().message("%s unequips %s.", name.c_str(), equippedArmor->name.c_str());
     }
     equippedArmor = armor;
     defensePower = armor->defensePower;
@@ -74,14 +68,12 @@ void Player::equipArmor(Armor* armor) {
 
 void Player::useItem(int itemIndex) {
     if (inventory == nullptr) {
-        printw("No inventory!\n");
-        refresh();
+        UI::get().message("No inventory!");
         return;
     }
 
     if (itemIndex < 0 || itemIndex >= (int)inventory->items.size()) {
-        printw("Invalid inventory slot.\n");
-        refresh();
+        UI::get().message("Invalid inventory slot.");
         return;
     }
     inventory->items[itemIndex]->use(this);

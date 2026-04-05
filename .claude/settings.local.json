@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/mingw64/lib -name *ncurses* -o -name *curses*)",
+      "Bash(find /c/Users/benja/Coding/sci-fi-dungeon-crawler -name *.bat -o -name *.sh -o -name Makefile)"
+    ]
+  }
+}

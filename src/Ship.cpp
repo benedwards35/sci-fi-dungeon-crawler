@@ -1,5 +1,4 @@
 #include "Ship.h"
-#include <iostream>
 
 Ship::Ship()
     : currentRoom(nullptr)
@@ -30,8 +29,7 @@ void Ship::connectRooms(Room* a, Room* b, int direction) {
         case EAST:  opposite = WEST;  break;
         case WEST:  opposite = EAST;  break;
         default:
-            std::cout << "Invalid direction.\n";
-            return;
+            return;  // invalid direction — called before UI init, so fail silently
     }
 
     a->exits[direction] = b;
