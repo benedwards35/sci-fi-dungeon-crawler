@@ -322,7 +322,7 @@ void UI::redrawHint() {
     werase(hintWin);
     wattron(hintWin, COLOR_PAIR(CP_HINT) | A_BOLD);
     mvwprintw(hintWin, 0, 1,
-        "[W/A/S/D] Move  [I] Inventory  [P] Pick up  [0-9] Use item  [Q] Quit");
+        "[W/A/S/D] Move  [C] Combat  [I] Inventory  [P] Pick up  [U] Unequip  [Q] Quit");
     wattroff(hintWin, COLOR_PAIR(CP_HINT) | A_BOLD);
     wrefresh(hintWin);
 }

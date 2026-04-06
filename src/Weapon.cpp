@@ -8,7 +8,9 @@ Weapon::Weapon(std::string name, std::string description, int damage, std::strin
       type(type) {}
 
 void Weapon::use(Player* player) {
-    player->equip(this);
-    UI::get().message("%s equips %s [%s | %d dmg]",
-        player->name.c_str(), name.c_str(), type.c_str(), damage);
+    if (player->equip(this)) {
+        UI::get().message("%s equips %s  [%s | %d dmg]",
+            player->name.c_str(), name.c_str(), type.c_str(), damage);
+    }
+    // If equip() returns false it already showed a "can't swap" message.
 }
