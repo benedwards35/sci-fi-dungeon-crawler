@@ -21,6 +21,7 @@ public:
     Room* exits[4];
 
     Room(std::string name, std::string description);
+    ~Room();  // deletes all Enemy* and Item* it still owns
 
     void describe() const;
 

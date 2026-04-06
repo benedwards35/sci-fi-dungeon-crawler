@@ -5,6 +5,12 @@
 Inventory::Inventory(int maxCapacity)
     : maxCapacity(maxCapacity) {}
 
+Inventory::~Inventory() {
+    for (Item* item : items) {
+        delete item;
+    }
+}
+
 bool Inventory::addItem(Item* item) {
     if ((int)items.size() >= maxCapacity) {
         UI::get().message("Inventory is full!");

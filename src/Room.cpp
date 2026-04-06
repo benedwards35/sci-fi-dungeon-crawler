@@ -10,6 +10,11 @@ Room::Room(std::string name, std::string description)
       exits{nullptr, nullptr, nullptr, nullptr}
 {}
 
+Room::~Room() {
+    for (Enemy* e : enemies) delete e;
+    for (Item*  i : items)   delete i;
+}
+
 void Room::describe() const {
     UI::get().drawRoom(this);
 }

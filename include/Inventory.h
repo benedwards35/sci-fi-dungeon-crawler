@@ -8,6 +8,7 @@ public:
     int maxCapacity;
 
     Inventory(int maxCapacity = 10);
+    ~Inventory();  // deletes all owned Item*
 
     bool addItem(Item* item);           // returns false if inventory is full
     void removeItem(Item* item);        // remove by pointer — used by Consumable
